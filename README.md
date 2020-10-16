@@ -16,5 +16,4 @@
 ![](screenshot.png)
 
 ## Website
-https://dashboard.heroku.com/apps/shop-shop-rutledge
-
+https://shop-shop-rutledge.herokuapp.com/
