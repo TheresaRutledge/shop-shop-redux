@@ -1,24 +1,28 @@
 import React,{useEffect} from "react";
 import { useQuery } from '@apollo/react-hooks';
-
-import { useStoreContext } from '../../utils/GlobalState';
-import { UPDATE_CART_QUANTITY, UPDATE_PRODUCTS } from '../../utils/actions';
-
+import { UPDATE_PRODUCTS } from '../../utils/actions';
 import ProductItem from "../ProductItem";
 import { QUERY_PRODUCTS } from "../../utils/queries";
 import spinner from "../../assets/spinner.gif";
 import { idbPromise } from "../../utils/helpers";
+import {store} from '../../utils/store';
+import {connect} from 'react-redux';
 
+const mapStateToProps = state => {
+  return {
+    currentCategory:state.currentCategory,
+    products:state.products
+  }
+}
 
-function ProductList() {
-  const [state, dispatch] = useStoreContext();
-  const {currentCategory} = state;
+function ProductList({currentCategory,products}) {
+ 
   const { loading, data } = useQuery(QUERY_PRODUCTS);
 
 
   useEffect(()=> {
     if(data){
-      dispatch({
+      store.dispatch({
         type:UPDATE_PRODUCTS,
         products:data.products
       });
@@ -27,26 +31,26 @@ function ProductList() {
       });
     } else if(!loading){
       idbPromise('products','get').then((products)=> {
-        dispatch({
+        store.dispatch({
           type:UPDATE_PRODUCTS,
           products:products
         });
       });
     }
-  },[data,loading,dispatch]);
+  },[data,loading,store.dispatch]);
 
   function filterProducts() {
     if (!currentCategory) {
-      return state.products;
+      return products;
     }
 
-    return state.products.filter(product => product.category._id === currentCategory);
+    return products.filter(product => product.category._id === currentCategory);
   }
 
   return (
     <div className="my-2">
       <h2>Our Products:</h2>
-      {state.products.length ? (
+      {products.length ? (
         <div className="flex-row">
             {filterProducts().map(product => (
                 <ProductItem
@@ -68,4 +72,4 @@ function ProductList() {
   );
 }
 
-export default ProductList;
+export default connect(mapStateToProps)(ProductList);
